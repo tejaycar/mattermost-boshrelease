@@ -35,13 +35,13 @@ EOF
 # mv ${mattermost_dir}/mattermost.tar.gz ${mattermost_dir}/mattermost-${mattermost_version}.tar.gz
 # WORKAROUND - explicitly downloading as concourse seems to be giving me small files
 wget -O ${mattermost_dir}/mattermost-${mattermost_version}.tar.gz \
-  https://github.com/mattermost/platform/releases/download/v${mattermost_version}/mattermost.tar.gz
+  https://releases.mattermost.com/${mattermost_version}/mattermost-${mattermost_version}-linux-amd64.tar.gz
 
 # currently there are no other blobs than mattermost; so throw away old one.
 cat > config/blob.yml << EOF
 --- {}
 EOF
-bosh add blob ${mattermost_dir}/mattermost-${mattermost_version}.tar.gz mattermost
+bosh add blob ${mattermost_dir}/mattermost-${mattermost_version}.tar.gz mattermost/mattermost-${mattermost_version}.tar.gz
 ls -alR blobs/
 
 bosh -n upload blobs
