@@ -7,7 +7,7 @@ packages:
 templates:
   bin/ctl: bin/ctl
   bin/monit_debugger: bin/monit_debugger
-  config/config.json.erb: config/config.json
+  config/initial-config.json.erb: config/initial-config.json
   config/license.erb: config/license
   data/properties.sh.erb: data/properties.sh
   helpers/ctl_setup.sh: helpers/ctl_setup.sh
@@ -16,6 +16,9 @@ templates:
 consumes:
   - name: cluster_nodes
     type: mattermost_cluster
+    optional: true
+  - name: postgresql
+    type: postgresql
     optional: true
 
 provides:
@@ -198,7 +201,6 @@ properties:
 
   mattermost.SqlSettings.DriverName:
     description: Either 'postgres' or 'mysql'
-    default: mysql
   mattermost.SqlSettings.DataSource:
     description: This is the connection string to the master database.
   mattermost.SqlSettings.MaxIdleConns:

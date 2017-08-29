@@ -1,0 +1,77 @@
+name: mattermost
+
+instance_groups:
+- name: mattermost
+  azs: [z1, z2, z3]
+  instances: 1
+  vm_type: default
+  stemcell: default
+  persistent_disk_type: 1GB
+  networks: [{name: default}]
+  jobs:
+  - release: postgres
+    name: postgres
+    provides:
+      db: {as: postgresql}
+    properties:
+      postgres:
+        hba:
+          - host all all 0.0.0.0/0 md5
+          - host all all ::/0 md5
+          - local all all trust
+          - local all all trust
+      pgpool:
+        databases:
+          - name: mattermost
+            users:
+              - admin
+              - mattermost
+            extensions: []
+        users:
+          - username: admin
+            password: ((db-admin-password))
+            admin:    true
+          - username: mattermost
+            password: ((db-mattermost-password))
+  - release: mattermost
+    name: mattermost
+    consumes:
+      postgresql: {from: postgresql}
+    properties:
+      mattermost:
+        SqlSettings:
+          AtRestEncryptKey: ((mattermost-sql-atrestencryptkey))
+        ServiceSettings:
+          SiteURL: ((mattermost-siteurl))
+
+variables:
+- name: db-admin-password
+  type: password
+- name: db-mattermost-password
+  type: password
+- name: mattermost-sql-atrestencryptkey
+  type: password
+  options:
+    length: 32
+
+update:
+  canaries: 1
+  max_in_flight: 50
+  canary_watch_time: 1000-30000
+  update_watch_time: 1000-30000
+  serial: false
+
+stemcells:
+- alias: default
+  os: ubuntu-trusty
+  version: latest
+
+releases:
+- name: postgres
+  version: 2.0.0
+  url: https://github.com/cloudfoundry-community/postgres-boshrelease/releases/download/v2.0.0/postgres-2.0.0.tgz
+  sha1: dea5cad517c62afaf97a1b31df41ad691928d960
+- name: mattermost
+  version: 6.0.0
+  url: https://github.com/cloudfoundry-community/mattermost-boshrelease/releases/download/v6.0.0/mattermost-6.0.0.tgz
+  sha1: 2a6758b093b35588d30a817d82b297a329bf1d54
